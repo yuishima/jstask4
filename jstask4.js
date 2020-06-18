@@ -9,22 +9,21 @@ const questionElement = document.getElementById("question");
 const answersElement = document.getElementById("answers");
 const resultElement = document.getElementById("result");
 const restartButton = document.getElementById("restart");
+//API URL
+const apiUrl = "https://opentdb.com/api.php?amount=10";
 //"以下のボタンをクリック"を表示
 containerElement.hidden = true;
 questionElement.textContent = "以下のボタンをクリック";
 restartButton.hidden = true;
 //クリックしたらクイズ情報の取得をする
 gameStartButton.addEventListener('click', () => {
-  const test = new QuizData();
-  test.fetchQuiz(apiUrl);
+  const test = new QuizData(apiUrl);
 });
 //Restartボタンが押されたらクイズをもう一回初めからやる
 restartButton.addEventListener('click', () => {
-  const test = new QuizData();
-  test.fetchQuiz(apiUrl);
+  const test = new QuizData(apiUrl);
 });
-//API URL
-const apiUrl = "https://opentdb.com/api.php?amount=10";
+
 //gameArrayオブジェクト
 //quizes 取得した問題のデータを入れている配列達
 //index　今何問目？
@@ -35,7 +34,7 @@ class QuizData {
     index: 0,
     correctAnswerCount: 0,
   };
-  fetchQuiz = (apiUrl) => {
+  constructor(apiUrl){
     headLine.textContent = "取得中・・・";
     questionElement.textContent = "少々お待ちください";
     resultElement.textContent = "";
@@ -66,7 +65,6 @@ class QuizData {
       this.finishQuiz();
     };
   };
-
   //表示要素を表示　makeQuizの呼び出し
   setQuiz() {
     containerElement.hidden = false;
