@@ -15,51 +15,53 @@ const apiUrl = "https://opentdb.com/api.php?amount=10";
 containerElement.hidden = true;
 questionElement.textContent = "以下のボタンをクリック";
 restartButton.hidden = true;
+//空の配列を宣言
+const gameArray = {
+  quizes: [],
+  index: 0,
+  correctAnswerCount: 0,
+};
+//APIを取ってくる　インスタンス生成
+const fetchQuiz = () => {
+  headLine.textContent = "取得中・・・";
+  questionElement.textContent = "少々お待ちください";
+  resultElement.textContent = "";
+  restartButton.hidden = true;
+  gameStartButton.hidden = true;
+  fetch(apiUrl)
+      .then((response) => response.json())
+      .then((quizData) => {
+        console.log(quizData);
+        const test = new QuizData(quizData);
+        test.countQuiz();
+      })
+      .catch((error) => console.log(error));
+};
 //クリックしたらクイズ情報の取得をする
 gameStartButton.addEventListener('click', () => {
-  const test = new QuizData(apiUrl);
+  fetchQuiz();
 });
 //Restartボタンが押されたらクイズをもう一回初めからやる
 restartButton.addEventListener('click', () => {
-  const test = new QuizData(apiUrl);
+  fetchQuiz();
 });
-
 //gameArrayオブジェクト
 //quizes 取得した問題のデータを入れている配列達
 //index　今何問目？
 //correctAnswerCount正解数カウント
 class QuizData {
-  gameArray = {
-    quizes: [],
-    index: 0,
-    correctAnswerCount: 0,
-  };
-  constructor(apiUrl){
-    headLine.textContent = "取得中・・・";
-    questionElement.textContent = "少々お待ちください";
-    resultElement.textContent = "";
-    restartButton.hidden = true;
-    gameStartButton.hidden = true;
-    console.log(apiUrl);
-    this.apiUrl = apiUrl;
-    //API取得
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((quizData) => {
-        //クイズデータの取得、gameArrayの中身リセット
-        this.gameArray.quizes = quizData.results;
-        this.gameArray.index = 0;
-        this.gameArray.correctAnswerCount = 0;
-        console.log(this.gameArray);
-        this.countQuiz();
-      })
-      .catch((error) => console.log(error));
-  };
+  //コンストラクタ　配列の初期化
+  constructor(quizData){
+    gameArray.quizes = quizData.results;
+    gameArray.index = 0;
+    gameArray.correctAnswerCount = 0;
+    console.log(gameArray.quizes);
+  }
   //クイズがいま何問目かを判断し10問目以下なら出題ファンクション、10問目以上だったらリザルト画面を表示するゾッド
   countQuiz() {
-    if (this.gameArray.quizes.length > this.gameArray.index) {
+    if (gameArray.quizes.length >gameArray.index) {
       questionElement.hidden = false;
-      questionElement.textContent = this.gameArray.quizes[this.gameArray.index].question;
+      questionElement.textContent = gameArray.quizes[gameArray.index].question;
       this.setQuiz();
     } else {
       this.finishQuiz();
@@ -71,16 +73,16 @@ class QuizData {
     questionElement.hidden = false;
     genreElement.hidden = false;
     difficultyElement.hidden = false;
-    const countQuestion = this.gameArray.index + 1;
+    const countQuestion = gameArray.index + 1;
     headLine.textContent = "問題" + countQuestion;
-    questionElement.textContent = this.gameArray.quizes[this.gameArray.index].question;
-    genreElement.textContent ="[ジャンル]" + this.gameArray.quizes[this.gameArray.index].category;
-    difficultyElement.textContent ="[難易度]" + this.gameArray.quizes[this.gameArray.index].difficulty;
-    this.makeAnswer(this.gameArray.quizes);
+    questionElement.textContent =gameArray.quizes[gameArray.index].question;
+    genreElement.textContent ="[ジャンル]" + gameArray.quizes[gameArray.index].category;
+    difficultyElement.textContent ="[難易度]" + gameArray.quizes[gameArray.index].difficulty;
+    this.makeAnswer(gameArray.quizes);
   };
   makeAnswer(quizLength) {
-    const correctAnswer = quizLength[this.gameArray.index].correct_answer;
-    const incorrectAnswers = quizLength[this.gameArray.index].incorrect_answers;
+    const correctAnswer = quizLength[gameArray.index].correct_answer;
+    const incorrectAnswers = quizLength[gameArray.index].incorrect_answers;
     const answers = incorrectAnswers.concat(correctAnswer);
     this.suffleAnswers(answers);
     //配列数の分だけ解答ボタンを作る
@@ -92,10 +94,10 @@ class QuizData {
       answersElement.appendChild(liElement);
       //解答の正偽判定
       buttonElement.addEventListener("click", (event) => {
-        if (event.target.textContent === quizLength[this.gameArray.index].correct_answer) {
-          this.gameArray.correctAnswerCount++;
+        if (event.target.textContent === quizLength[gameArray.index].correct_answer) {
+          gameArray.correctAnswerCount++;
         };
-        this.gameArray.index++;
+        gameArray.index++;
         this.removeAnswers();
       });
     };
@@ -109,7 +111,7 @@ class QuizData {
   };
   //10問目が終わったら表示されるリザルト画面
   finishQuiz() {
-    headLine.textContent = "あなたの正当数は" + this.gameArray.correctAnswerCount + "です！！";
+    headLine.textContent = "あなたの正当数は" + gameArray.correctAnswerCount + "です！！";
     containerElement.hidden = true;
     restartButton.hidden = false;
     questionElement.textContent = "再チャレンジしたい場合は以下をクリック！";
